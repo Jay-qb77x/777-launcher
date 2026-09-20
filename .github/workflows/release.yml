@@ -1,0 +1,28 @@
+name: Release
+
+# Push a tag like v1.0.1 and GitHub builds the Windows installer and attaches it
+# to a Release. The launcher's auto-updater reads that Release.
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm install
+
+      - run: npx electron-builder --win --publish always
+        env:
+          # Provided automatically by GitHub. It is not a secret you have to create.
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

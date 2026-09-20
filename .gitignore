@@ -1,0 +1,14 @@
+node_modules/
+dist/
+out/
+*.log
+
+# You don't need .env in this project. If you ever add one, it must never be committed.
+.env
+.env.*
+!.env.example
+
+# Signing certificates
+*.pfx
+*.p12
+*.pem

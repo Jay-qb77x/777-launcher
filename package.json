@@ -1,0 +1,49 @@
+{
+  "name": "777-launcher",
+  "productName": "777 Launcher",
+  "version": "1.0.0",
+  "description": "777 Launcher",
+  "main": "main.js",
+  "author": "jinx",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win",
+    "hash": "node tools/hash.js"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.9"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "1551310361809002536",
+    "productName": "777 Launcher",
+    "files": [
+      "main.js",
+      "preload.js",
+      "config.js",
+      "manifest.sample.json",
+      "lib/**/*",
+      "renderer/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "Jay-qb77x",
+        "repo": "777-launcher"
+      }
+    ]
+  }
+}

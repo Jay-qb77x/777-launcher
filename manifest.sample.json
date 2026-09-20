@@ -1,0 +1,62 @@
+{
+  "announcement": null,
+  "blockedUserIds": [],
+  "news": [
+    {
+      "id": "welcome",
+      "title": "Welcome to 777 Launcher",
+      "body": "Sign in with Discord, then grab models and textures from the Extras tab.",
+      "date": "2026-09-20"
+    }
+  ],
+  "updates": [
+    {
+      "version": "1.0.0",
+      "title": "First release",
+      "date": "2026-09-20",
+      "notes": [
+        "Discord sign-in",
+        "Extras with one-click downloads and file verification",
+        "Automatic launcher updates"
+      ]
+    }
+  ],
+  "tutorials": [
+    {
+      "id": "How To Make FiveM Weapons Glow In Blender",
+      "title": "How to make a gun glow",
+      "description": "How To Make FiveM Weapons Glow In Blender",
+      "duration": "2:50",
+      "thumbnail": "",
+      "url": "https://www.youtube.com/watch?v=uxmxW0WrPgs&t=7s"
+    }
+  ],
+  "extras": [
+    {
+      "id": "rubber-bands-pack",
+      "name": "Rubber Bands Pack",
+      "category": "Models",
+      "description": "A set of rubber band models, ready to drop into your scene.",
+      "version": "1",
+      "size": 4708000,
+      "date": "2026-03-20",
+      "thumbnail": "",
+      "fileName": "rubber-bands-pack.zip",
+      "url": "https://github.com/YOUR_GITHUB_USERNAME/777-launcher-content/releases/download/files/rubber-bands-pack.zip",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "id": "glass-colors",
+      "name": "Glass Colors",
+      "category": "Textures",
+      "description": "Tinted glass textures in a range of colors.",
+      "version": "1",
+      "size": 3000000,
+      "date": "2026-02-10",
+      "thumbnail": "",
+      "fileName": "glass-colors.zip",
+      "url": "https://github.com/YOUR_GITHUB_USERNAME/777-launcher-content/releases/download/files/glass-colors.zip",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ]
+}
