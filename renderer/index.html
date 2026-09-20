@@ -25,13 +25,19 @@
     <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></symbol>
     <symbol id="i-external" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></symbol>
     <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
   </svg>
+
+  <!-- User-chosen background picture (see Appearance panel) -->
+  <div class="bg-layer" id="bg-image" aria-hidden="true"></div>
+  <div class="bg-layer bg-dim" id="bg-dim" aria-hidden="true"></div>
 
   <div class="app">
     <aside class="sidebar">
       <div class="brand" aria-label="777 Launcher">
-        <span class="brand-mark">777</span>
+        <img class="brand-logo" src="logo.png" alt="777 Development" width="72" height="72">
         <span class="brand-name">Launcher</span>
       </div>
 
@@ -57,7 +63,7 @@
   <!-- Sign-in screen -->
   <div class="gate is-hidden" id="gate" role="dialog" aria-modal="true" aria-labelledby="gate-title">
     <div class="gate-card">
-      <div class="brand brand-lg"><span class="brand-mark">777</span><span class="brand-name">Launcher</span></div>
+      <div class="brand brand-lg"><img class="brand-logo" src="logo.png" alt="777 Development" width="150" height="150"><span class="brand-name">Launcher</span></div>
       <h1 id="gate-title">Sign in to continue</h1>
       <p class="gate-text" id="gate-text">Use your Discord account to get in.</p>
       <p class="gate-error" id="gate-error" role="alert"></p>
