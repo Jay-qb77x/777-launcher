@@ -263,9 +263,10 @@ h1, h2, h3, p { margin: 0; }
 }
 .card:hover { border-color: rgba(61, 107, 255, 0.55); box-shadow: 0 0 0 3px var(--accent-soft); }
 
-.thumb {
-  position: relative;
-  aspect-ratio: 16 / 8;
+   .thumb {
+     position: relative;
+     width: 100%;
+     aspect-ratio: 16 / 8;
   display: grid;
   place-items: center;
   background: linear-gradient(135deg, hsl(var(--hue, 220) 38% 17%), hsl(var(--hue, 220) 30% 11%));

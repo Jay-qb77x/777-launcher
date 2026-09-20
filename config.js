@@ -29,7 +29,7 @@ module.exports = {
   // launcher with the bundled manifest.sample.json.
   // Example:
   // 'https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/777-launcher-content/main/manifest.json'
-  manifestUrl: '',
+  manifestUrl: 'https://raw.githubusercontent.com/Jay-qb77x/777-launcher-content/main/manifest.json',
 
   // Downloads are only allowed from these hosts (and their subdomains).
   // GitHub Releases redirects to *.githubusercontent.com, so both are listed.
