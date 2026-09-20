@@ -31,9 +31,10 @@
       "renderer/**/*",
       "package.json"
     ],
-    "win": {
-      "target": "nsis"
-    },
+  "win": {
+  "target": "nsis",
+  "icon": "build/icon.ico"
+},
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
