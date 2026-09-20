@@ -62,6 +62,7 @@ function createWindow() {
     minHeight: 600,
     backgroundColor: '#08090c',
     title: config.appName,
+    icon: path.join(__dirname, 'renderer', 'logo.png'),
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),

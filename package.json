@@ -1,7 +1,7 @@
 {
   "name": "777-launcher",
   "productName": "777 Launcher",
-  "version": "1.0.0",
+  "version": "1.0.4",
   "description": "777 Launcher",
   "main": "main.js",
   "author": "Jay-qb77x",
@@ -31,19 +31,21 @@
       "renderer/**/*",
       "package.json"
     ],
-  "win": {
-  "target": "nsis",
-  "icon": "build/icon.ico"
-},
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico"
+    },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "777-Launcher-Setup.${ext}"
     },
     "publish": [
       {
         "provider": "github",
         "owner": "Jay-qb77x",
-        "repo": "777-launcher"
+        "repo": "777-launcher",
+        "releaseType": "release"
       }
     ]
   }

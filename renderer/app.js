@@ -134,20 +134,337 @@
     return wrap;
   }
 
+  // ---------- appearance: background color + your own picture ----------
+  // Saved on this PC only (localStorage). Nothing is sent anywhere.
+
+  const THEME_KEY = '777.theme';
+  const IMAGE_KEY = '777.background';
+  const DEFAULT_BG = '#08090c';
+  const DEFAULT_DIM = 0.45;
+  const BG_PRESETS = [
+    { name: 'Default', color: '#08090c' },
+    { name: 'Midnight', color: '#0b1226' },
+    { name: 'Ocean', color: '#06202b' },
+    { name: 'Teal', color: '#062a26' },
+    { name: 'Forest', color: '#08170f' },
+    { name: 'Indigo', color: '#12103a' },
+    { name: 'Plum', color: '#1a0d26' },
+    { name: 'Crimson', color: '#240a10' },
+    { name: 'Espresso', color: '#1e130c' },
+    { name: 'Graphite', color: '#1b1d22' },
+    { name: 'Light', color: '#eef1f7' },
+    { name: 'Cream', color: '#f4efe6' },
+  ];
+  const WHITE = [255, 255, 255];
+  const BLACK = [0, 0, 0];
+  const THEME_VARS = ['--bg', '--panel', '--raised', '--raised-2', '--line', '--line-strong', '--text', '--muted', '--faint'];
+
+  let theme = { color: DEFAULT_BG, dim: DEFAULT_DIM };
+  let bgImage = null;
+  let themePop = null;
+
+  const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
+  const isHex = (v) => typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v);
+  const hexToRgb = (hex) => {
+    const n = parseInt(hex.slice(1), 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  };
+  const rgbToHex = (rgb) => `#${rgb.map((v) => Math.round(clamp(v, 0, 255)).toString(16).padStart(2, '0')).join('')}`;
+  const mix = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
+  const luminance = (rgb) => {
+    const [r, g, b] = rgb.map((v) => {
+      const c = v / 255;
+      return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+
+  function loadTheme() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(THEME_KEY) || 'null');
+      if (saved && isHex(saved.color)) theme.color = saved.color.toLowerCase();
+      if (saved && typeof saved.dim === 'number') theme.dim = clamp(saved.dim, 0, 0.9);
+      const img = localStorage.getItem(IMAGE_KEY);
+      if (img && img.startsWith('data:image/')) bgImage = img;
+    } catch {
+      // Storage unavailable or damaged: the default look is fine.
+    }
+  }
+
+  function saveTheme() {
+    try {
+      localStorage.setItem(THEME_KEY, JSON.stringify(theme));
+    } catch {
+      // Not saved, but the change still applies for this session.
+    }
+  }
+
+  function applyTheme() {
+    const root = document.documentElement;
+    const set = (name, rgb) => root.style.setProperty(name, rgbToHex(rgb));
+
+    if (theme.color === DEFAULT_BG) {
+      // Untouched: use the stylesheet's own colors exactly as designed.
+      THEME_VARS.forEach((v) => root.style.removeProperty(v));
+      root.removeAttribute('data-theme');
+      root.style.removeProperty('color-scheme');
+    } else {
+      const bg = hexToRgb(theme.color);
+      const light = luminance(bg) > 0.25;
+      set('--bg', bg);
+      if (light) {
+        set('--panel', mix(bg, WHITE, 0.45));
+        set('--raised', mix(bg, WHITE, 0.7));
+        set('--raised-2', mix(bg, BLACK, 0.05));
+        set('--line', mix(bg, BLACK, 0.11));
+        set('--line-strong', mix(bg, BLACK, 0.22));
+        root.style.setProperty('--text', '#10131a');
+        root.style.setProperty('--muted', '#485169');
+        root.style.setProperty('--faint', '#5d6780');
+      } else {
+        set('--panel', mix(bg, WHITE, 0.035));
+        set('--raised', mix(bg, WHITE, 0.06));
+        set('--raised-2', mix(bg, WHITE, 0.1));
+        set('--line', mix(bg, WHITE, 0.13));
+        set('--line-strong', mix(bg, WHITE, 0.21));
+        ['--text', '--muted', '--faint'].forEach((v) => root.style.removeProperty(v));
+      }
+      root.dataset.theme = light ? 'light' : 'dark';
+      root.style.colorScheme = light ? 'light' : 'dark';
+    }
+
+    const layer = $('#bg-image');
+    const dim = $('#bg-dim');
+    if (bgImage) {
+      layer.style.backgroundImage = `url("${bgImage}")`;
+      layer.classList.add('has-image');
+      dim.style.opacity = String(theme.dim);
+    } else {
+      layer.style.backgroundImage = '';
+      layer.classList.remove('has-image');
+      dim.style.opacity = '0';
+    }
+  }
+
+  function readAsDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error('Could not read that file.'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function loadImage(src) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error('That file isn’t a picture the launcher can open.'));
+      img.src = src;
+    });
+  }
+
+  /** Shrinks the picture to screen size so it stays small enough to save. */
+  async function prepareBackground(file) {
+    if (!/^image\/(png|jpe?g|webp|gif|bmp)$/i.test(file.type)) throw new Error('Choose a PNG, JPG, WebP or GIF picture.');
+    if (file.size > 40 * 1024 * 1024) throw new Error('That picture is too large. Try one under 40 MB.');
+    const img = await loadImage(await readAsDataUrl(file));
+    let longest = 2200;
+    let quality = 0.86;
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const scale = Math.min(1, longest / Math.max(img.naturalWidth, img.naturalHeight));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
+      canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = theme.color; // fills any transparent areas
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const url = canvas.toDataURL('image/jpeg', quality);
+      if (url.length <= 3500000) return url;
+      longest = Math.round(longest * 0.75);
+      quality = Math.max(0.6, quality - 0.06);
+    }
+    throw new Error('That picture is too large to save. Try a smaller one.');
+  }
+
+  function closeTheme() {
+    if (!themePop) return;
+    themePop.remove();
+    themePop = null;
+    document.removeEventListener('mousedown', onThemeOutside, true);
+    document.removeEventListener('keydown', onThemeKey, true);
+    const trigger = $('.avatar-btn');
+    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+  }
+
+  function onThemeOutside(e) {
+    if (themePop && !themePop.contains(e.target) && !e.target.closest('.avatar-btn, .appearance-btn')) closeTheme();
+  }
+
+  function onThemeKey(e) {
+    if (e.key === 'Escape') closeTheme();
+  }
+
+  function toggleTheme() {
+    if (themePop) {
+      closeTheme();
+      return;
+    }
+    themePop = buildThemePanel();
+    document.body.append(themePop);
+    document.addEventListener('mousedown', onThemeOutside, true);
+    document.addEventListener('keydown', onThemeKey, true);
+    const trigger = $('.avatar-btn');
+    if (trigger) trigger.setAttribute('aria-expanded', 'true');
+    const first = $('.swatch.is-active', themePop) || $('.swatch', themePop);
+    if (first) first.focus();
+  }
+
+  function buildThemePanel() {
+    const fileInput = h('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp,image/gif,image/bmp', class: 'is-hidden', tabindex: '-1', 'aria-hidden': 'true' });
+    const colorInput = h('input', { type: 'color', value: theme.color, class: 'color-input', 'aria-label': 'Pick any background color', onInput: (e) => setColor(e.target.value) });
+    const hex = h('span', { class: 'color-hex' });
+    const swatches = BG_PRESETS.map((p) => {
+      const btn = h('button', { class: 'swatch', title: p.name, 'aria-label': `${p.name} background`, 'data-color': p.color, onClick: () => setColor(p.color) });
+      btn.style.backgroundColor = p.color;
+      return btn;
+    });
+    const dimValue = h('span', { class: 'range-value' });
+    const dimRange = h('input', {
+      type: 'range',
+      min: '0',
+      max: '90',
+      step: '5',
+      value: String(Math.round(theme.dim * 100)),
+      'aria-label': 'How much to darken the picture',
+      onInput: (e) => {
+        theme.dim = Number(e.target.value) / 100;
+        dimValue.textContent = `${e.target.value}%`;
+        applyTheme();
+        saveTheme();
+      },
+    });
+    const dimRow = h('div', { class: 'range-row' }, h('span', { text: 'Dim' }), dimRange, dimValue);
+    const removeBtn = h('button', { class: 'btn btn-ghost btn-sm', onClick: removePicture, text: 'Remove' });
+
+    function sync() {
+      colorInput.value = theme.color;
+      hex.textContent = theme.color.toUpperCase();
+      swatches.forEach((s) => {
+        const on = s.dataset.color === theme.color;
+        s.classList.toggle('is-active', on);
+        s.setAttribute('aria-pressed', String(on));
+      });
+      dimRow.classList.toggle('is-hidden', !bgImage);
+      removeBtn.classList.toggle('is-hidden', !bgImage);
+      dimRange.value = String(Math.round(theme.dim * 100));
+      dimValue.textContent = `${Math.round(theme.dim * 100)}%`;
+    }
+
+    function setColor(color) {
+      if (!isHex(color)) return;
+      theme.color = color.toLowerCase();
+      saveTheme();
+      applyTheme();
+      sync();
+    }
+
+    function removePicture() {
+      bgImage = null;
+      try {
+        localStorage.removeItem(IMAGE_KEY);
+      } catch {
+        // Nothing saved to remove.
+      }
+      applyTheme();
+      sync();
+    }
+
+    function resetAll() {
+      theme = { color: DEFAULT_BG, dim: DEFAULT_DIM };
+      bgImage = null;
+      try {
+        localStorage.removeItem(THEME_KEY);
+        localStorage.removeItem(IMAGE_KEY);
+      } catch {
+        // Nothing saved to remove.
+      }
+      applyTheme();
+      sync();
+      toast('Appearance reset');
+    }
+
+    fileInput.addEventListener('change', async () => {
+      const file = fileInput.files && fileInput.files[0];
+      fileInput.value = '';
+      if (!file) return;
+      const previous = bgImage;
+      try {
+        const url = await prepareBackground(file);
+        bgImage = url;
+        try {
+          localStorage.setItem(IMAGE_KEY, url);
+        } catch {
+          bgImage = previous;
+          throw new Error('Not enough space to save that picture. Try a smaller one.');
+        }
+        saveTheme();
+        applyTheme();
+        sync();
+        toast('Background updated', 'ok');
+      } catch (err) {
+        toast(err.message || 'Could not use that picture.', 'error');
+      }
+    });
+
+    const panel = h(
+      'div',
+      { class: 'theme-pop', role: 'dialog', 'aria-label': 'Appearance' },
+      h('div', { class: 'theme-head' }, h('h2', { text: 'Appearance' }), h('button', { class: 'icon-btn', title: 'Close', 'aria-label': 'Close', onClick: closeTheme }, icon('x'))),
+      h(
+        'section',
+        {},
+        h('div', { class: 'theme-label', text: 'Background color' }),
+        h('div', { class: 'swatches' }, swatches),
+        h('div', { class: 'color-row' }, colorInput, h('span', { class: 'color-hint', text: 'Any color' }), hex)
+      ),
+      h(
+        'section',
+        {},
+        h('div', { class: 'theme-label', text: 'Your own background' }),
+        h('div', { class: 'theme-actions' }, h('button', { class: 'btn btn-secondary btn-sm', onClick: () => fileInput.click() }, icon('upload'), 'Choose picture'), removeBtn),
+        dimRow,
+        fileInput
+      ),
+      h('div', { class: 'theme-foot' }, h('button', { class: 'btn btn-ghost btn-sm', onClick: resetAll, text: 'Reset to default' }), h('p', { class: 'theme-fine', text: 'Saved on this PC only.' }))
+    );
+    sync();
+    return panel;
+  }
+
   // ---------- account + sign-in ----------
 
   function renderAccount() {
+    closeTheme();
     const box = $('#account');
     box.replaceChildren();
     const user = state.session && state.session.user;
     if (!user) {
       if (!state.info.requireLogin) {
-        box.append(h('button', { class: 'btn btn-secondary btn-sm', onClick: () => showGate('idle'), text: 'Sign in' }));
+        box.append(
+          h('button', { class: 'btn btn-secondary btn-sm', onClick: () => showGate('idle'), text: 'Sign in' }),
+          h('button', { class: 'icon-btn appearance-btn', title: 'Appearance', 'aria-label': 'Appearance', 'aria-haspopup': 'dialog', onClick: toggleTheme }, icon('image'))
+        );
       }
       return;
     }
     box.append(
-      avatar(user),
+      h(
+        'button',
+        { class: 'avatar-btn', title: 'Change background', 'aria-label': 'Appearance: change background', 'aria-haspopup': 'dialog', 'aria-expanded': 'false', onClick: toggleTheme },
+        avatar(user)
+      ),
       h('span', { class: 'account-name', title: user.displayName, text: user.displayName }),
       h('button', { class: 'icon-btn', title: 'Sign out', 'aria-label': 'Sign out', onClick: signOut }, icon('logout'))
     );
@@ -569,5 +886,7 @@
     await loadContent();
   }
 
+  loadTheme();
+  applyTheme();
   init().catch((err) => toast(err.message || 'The launcher could not start.', 'error'));
 })();
