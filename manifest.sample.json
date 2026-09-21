@@ -8,22 +8,16 @@
       "body": "Sign in with Discord, then grab models and textures from the Extras tab.",
       "date": "2026-09-20"
     }
-     {
-      "id": "Tebex",
-      "title": "777 Tebex ",
-      "body": "This is our tebex where we sell premium scripts.",
-      "date": "2026-09-20"
-    }
   ],
   "updates": [
     {
-      "version": "1.0.0",
+      "version": "1.0.1",
       "title": "First release",
       "date": "2026-09-20",
       "notes": [
-        "Discord sign-in",
-        "Extras with one-click downloads and file verification",
-        "Automatic launcher updates"
+        "Added Discord Logins🔑",
+        "Extras with one-click downloads and file verification📁",
+        "Automatic Tutorials tab❗"
       ]
     }
   ],
@@ -35,44 +29,31 @@
       "duration": "2:50",
       "thumbnail": "https://i.ytimg.com/vi/uxmxW0WrPgs/hqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=uxmxW0WrPgs&t=7s"
+    },
+
+                {
+      "id": "Script",
+      "title": "OX Inventory Redesign",
+      "description": "OX Inventory Redesign",
+      "duration": "0:31",
+      "thumbnail": "https://i.ytimg.com/vi/E-lfd1T4sMM/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=E-lfd1T4sMM"
     }
+
   ],
   "extras": [
   {
     "id": "glock-attach",
-    "name": "Glock ",
+    "name": "Double Glock ",
     "category": "Models",
     "description": "Glock model",
     "version": "1",
     "size": 2.68,
     "date": "2026-09-20",
-    "thumbnail": "",
+    "thumbnail": "https://cdn.discordapp.com/attachments/1548801327596052581/1551408359218090014/image.png?ex=6ab1dd20&is=6ab08ba0&hm=2006b417217aa5a77e7c578f587dbb74c001383083985746fa2e8639a99c4da6&",
     "fileName": "glock_attach.zip",
     "url": "https://github.com/Jay-qb77x/777-launcher-content/releases/download/files/glock_attach.zip",
     "sha256": "e28ff731aabd5006e428b0e8714bd884cc3ddced32ebe54c858dbcb4594659a5"
-  },
-    {
-      "id": "glass-colors",
-      "name": "Glass Colors",
-      "category": "Textures",
-      "description": "Tinted glass textures in a range of colors.",
-      "version": "1",
-      "size": 3000000,
-      "date": "2026-02-10",
-      "thumbnail": "",
-      "fileName": "glass-colors.zip",
-      "url": "https://github.com/Jay-qb77x/777-launcher-content/releases/download/files/glass-colors.zip",
-      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
-    }
-  ],
-  "Script Videos": [
-    {
-      "id": "Tow truck",
-      "title": "Tow truck script",
-      "description": "Tow truck script",
-      "duration": "2:50",
-      "thumbnail": "https://i.ytimg.com/vi/uxmxW0WrPgs/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=yqHMJLPVC5w"
-    }
+  }
   ]
 }

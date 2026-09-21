@@ -25,6 +25,7 @@
     <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></symbol>
     <symbol id="i-external" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-code" viewBox="0 0 24 24"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></symbol>
     <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
     <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></symbol>
     <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
@@ -33,6 +34,7 @@
   <!-- User-chosen background picture (see Appearance panel) -->
   <div class="bg-layer" id="bg-image" aria-hidden="true"></div>
   <div class="bg-layer bg-dim" id="bg-dim" aria-hidden="true"></div>
+  <canvas class="bg-layer" id="bg-fx" aria-hidden="true"></canvas>
 
   <div class="app">
     <aside class="sidebar">
@@ -45,6 +47,7 @@
         <button class="nav-item is-active" data-view="home" aria-current="page"><svg class="icon"><use href="#i-home"/></svg><span>Home</span></button>
         <button class="nav-item" data-view="updates"><svg class="icon"><use href="#i-bell"/></svg><span>Updates</span></button>
         <button class="nav-item" data-view="tutorials"><svg class="icon"><use href="#i-play"/></svg><span>Tutorials</span></button>
+        <button class="nav-item" data-view="scripts"><svg class="icon"><use href="#i-code"/></svg><span>Scripts</span></button>
         <button class="nav-item" data-view="extras"><svg class="icon"><use href="#i-folder"/></svg><span>Extras</span></button>
       </nav>
 
@@ -56,6 +59,7 @@
       <section class="view is-active" id="view-home" aria-live="polite"></section>
       <section class="view" id="view-updates"></section>
       <section class="view" id="view-tutorials"></section>
+      <section class="view" id="view-scripts"></section>
       <section class="view" id="view-extras"></section>
     </main>
   </div>

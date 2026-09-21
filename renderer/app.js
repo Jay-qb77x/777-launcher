@@ -159,7 +159,8 @@
   const BLACK = [0, 0, 0];
   const THEME_VARS = ['--bg', '--panel', '--raised', '--raised-2', '--line', '--line-strong', '--text', '--muted', '--faint'];
 
-  let theme = { color: DEFAULT_BG, dim: DEFAULT_DIM };
+  const defaultTheme = () => ({ color: DEFAULT_BG, dim: DEFAULT_DIM, fx: 'none', fxColor: '#3d6bff', fxSpeed: 1 });
+  let theme = defaultTheme();
   let bgImage = null;
   let themePop = null;
 
@@ -184,6 +185,9 @@
       const saved = JSON.parse(localStorage.getItem(THEME_KEY) || 'null');
       if (saved && isHex(saved.color)) theme.color = saved.color.toLowerCase();
       if (saved && typeof saved.dim === 'number') theme.dim = clamp(saved.dim, 0, 0.9);
+      if (saved && FX_STYLES.some((f) => f.id === saved.fx)) theme.fx = saved.fx;
+      if (saved && isHex(saved.fxColor)) theme.fxColor = saved.fxColor.toLowerCase();
+      if (saved && typeof saved.fxSpeed === 'number') theme.fxSpeed = clamp(saved.fxSpeed, 0.25, 2);
       const img = localStorage.getItem(IMAGE_KEY);
       if (img && img.startsWith('data:image/')) bgImage = img;
     } catch {
@@ -288,6 +292,189 @@
     throw new Error('That picture is too large to save. Try a smaller one.');
   }
 
+  // ---------- animated backgrounds ----------
+  // Drawn on one canvas behind the app. Runs at ~30 fps and pauses when the
+  // window is hidden, so it stays light on the GPU/CPU.
+
+  const FX_STYLES = [
+    { id: 'none', name: 'Off' },
+    { id: 'aurora', name: 'Aurora' },
+    { id: 'particles', name: 'Particles' },
+    { id: 'stars', name: 'Stars' },
+  ];
+  const fx = { canvas: null, ctx: null, raf: 0, w: 0, h: 0, last: 0, t: 0, items: [], resizing: false };
+  const reducedMotion = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const rgba = (rgb, a) => `rgba(${Math.round(rgb[0])}, ${Math.round(rgb[1])}, ${Math.round(rgb[2])}, ${a})`;
+
+  function shiftHue(rgb, deg) {
+    const [r, g, b] = rgb.map((v) => v / 255);
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const l = (max + min) / 2;
+    const d = max - min;
+    let hue = 0;
+    let s = 0;
+    if (d) {
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      if (max === r) hue = (g - b) / d + (g < b ? 6 : 0);
+      else if (max === g) hue = (b - r) / d + 2;
+      else hue = (r - g) / d + 4;
+      hue *= 60;
+    }
+    hue = (hue + deg + 360) % 360;
+    const c = (1 - Math.abs(2 * l - 1)) * s;
+    const x = c * (1 - Math.abs(((hue / 60) % 2) - 1));
+    const m = l - c / 2;
+    const parts = [[c, x, 0], [x, c, 0], [0, c, x], [0, x, c], [x, 0, c], [c, 0, x]][Math.floor(hue / 60) % 6];
+    return parts.map((v) => (v + m) * 255);
+  }
+
+  function fxResize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    fx.w = window.innerWidth;
+    fx.h = window.innerHeight;
+    fx.canvas.width = Math.round(fx.w * dpr);
+    fx.canvas.height = Math.round(fx.h * dpr);
+    fx.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function fxSeed() {
+    const { w, h } = fx;
+    if (theme.fx === 'particles') {
+      const n = clamp(Math.round((w * h) / 15000), 35, 100);
+      fx.items = Array.from({ length: n }, () => ({ x: Math.random() * w, y: Math.random() * h, vx: (Math.random() - 0.5) * 36, vy: (Math.random() - 0.5) * 36, r: 1 + Math.random() * 1.6 }));
+    } else if (theme.fx === 'stars') {
+      const n = clamp(Math.round((w * h) / 5500), 80, 320);
+      fx.items = Array.from({ length: n }, () => ({ x: Math.random() * w, y: Math.random() * h, r: 0.4 + Math.random() * 1.3, tw: Math.random() * 6.28, sp: 0.4 + Math.random() * 1.6, z: 0.3 + Math.random() * 0.7 }));
+    } else {
+      const hues = [0, 40, -35, 75];
+      fx.items = hues.map((hue) => ({ px: Math.random() * 6.28, py: Math.random() * 6.28, sx: 0.12 + Math.random() * 0.13, sy: 0.1 + Math.random() * 0.13, hue, size: 0.32 + Math.random() * 0.18 }));
+    }
+  }
+
+  /** Draws one frame. `step` is seconds of animation time to advance (0 = still frame). */
+  function drawFx(step) {
+    const { ctx, w, h, items } = fx;
+    ctx.clearRect(0, 0, w, h);
+    const rgb = hexToRgb(theme.fxColor);
+    const light = document.documentElement.dataset.theme === 'light';
+    fx.t += step;
+
+    if (theme.fx === 'aurora') {
+      const reach = Math.max(w, h);
+      for (const b of items) {
+        const x = w * (0.5 + 0.4 * Math.sin(fx.t * b.sx + b.px));
+        const y = h * (0.5 + 0.4 * Math.cos(fx.t * b.sy + b.py));
+        const r = reach * b.size;
+        const col = shiftHue(rgb, b.hue);
+        const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
+        grad.addColorStop(0, rgba(col, light ? 0.3 : 0.4));
+        grad.addColorStop(1, rgba(col, 0));
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+      }
+    } else if (theme.fx === 'particles') {
+      for (const p of items) {
+        p.x += p.vx * step;
+        p.y += p.vy * step;
+        if (p.x < -10) p.x = w + 10;
+        else if (p.x > w + 10) p.x = -10;
+        if (p.y < -10) p.y = h + 10;
+        else if (p.y > h + 10) p.y = -10;
+      }
+      ctx.lineWidth = 1;
+      for (let i = 0; i < items.length; i += 1) {
+        const a = items[i];
+        for (let j = i + 1; j < items.length; j += 1) {
+          const b = items[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const dist = dx * dx + dy * dy;
+          if (dist < 14400) {
+            ctx.strokeStyle = rgba(rgb, (1 - dist / 14400) * 0.32);
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+          }
+        }
+      }
+      ctx.fillStyle = rgba(rgb, 0.75);
+      for (const p of items) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, 6.2832);
+        ctx.fill();
+      }
+    } else if (theme.fx === 'stars') {
+      const tint = light ? rgb : mix(rgb, WHITE, 0.6);
+      for (const s of items) {
+        s.x -= 3 * s.z * step;
+        s.y += 6 * s.z * step;
+        if (s.x < -4) s.x = w + 4;
+        if (s.y > h + 4) s.y = -4;
+        const twinkle = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(fx.t * s.sp + s.tw));
+        ctx.fillStyle = rgba(tint, twinkle * (0.5 + 0.5 * s.z));
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, 6.2832);
+        ctx.fill();
+      }
+    }
+  }
+
+  function fxFrame(ts) {
+    fx.raf = requestAnimationFrame(fxFrame);
+    if (fx.last && ts - fx.last < 30) return; // ~30 fps is plenty for a background
+    const dt = fx.last ? Math.min(0.1, (ts - fx.last) / 1000) : 0;
+    fx.last = ts;
+    drawFx(dt * theme.fxSpeed);
+  }
+
+  function fxStopLoop() {
+    if (fx.raf) cancelAnimationFrame(fx.raf);
+    fx.raf = 0;
+  }
+
+  function fxStartLoop() {
+    if (fx.raf || theme.fx === 'none' || reducedMotion() || document.hidden) return;
+    fx.last = 0;
+    fx.raf = requestAnimationFrame(fxFrame);
+  }
+
+  /** Redraws a still frame (used when the loop isn't running, e.g. reduced motion). */
+  function fxRefreshStill() {
+    if (!fx.raf && theme.fx !== 'none') drawFx(0);
+  }
+
+  function applyFx() {
+    if (!fx.canvas) {
+      fx.canvas = $('#bg-fx');
+      fx.ctx = fx.canvas.getContext('2d');
+      document.addEventListener('visibilitychange', () => (document.hidden ? fxStopLoop() : fxStartLoop()));
+      window.addEventListener('resize', () => {
+        if (fx.resizing || theme.fx === 'none') return;
+        fx.resizing = true;
+        requestAnimationFrame(() => {
+          fx.resizing = false;
+          fxResize();
+          fxSeed();
+          fxRefreshStill();
+        });
+      });
+    }
+    fxStopLoop();
+    if (theme.fx === 'none') {
+      fx.canvas.classList.remove('is-on');
+      fx.ctx.clearRect(0, 0, fx.canvas.width, fx.canvas.height);
+      return;
+    }
+    fx.canvas.classList.add('is-on');
+    fxResize();
+    fxSeed();
+    fx.t = 5; // start mid-cycle so a still frame already looks good
+    drawFx(0);
+    fxStartLoop();
+  }
+
   function closeTheme() {
     if (!themePop) return;
     themePop.remove();
@@ -348,6 +535,40 @@
     const dimRow = h('div', { class: 'range-row' }, h('span', { text: 'Dim' }), dimRange, dimValue);
     const removeBtn = h('button', { class: 'btn btn-ghost btn-sm', onClick: removePicture, text: 'Remove' });
 
+    const fxChips = FX_STYLES.map((f) => h('button', { class: 'chip', 'data-fx': f.id, onClick: () => setFx(f.id), text: f.name }));
+    const fxColorInput = h('input', {
+      type: 'color',
+      value: theme.fxColor,
+      class: 'color-input',
+      'aria-label': 'Animation color',
+      onInput: (e) => {
+        theme.fxColor = e.target.value.toLowerCase();
+        saveTheme();
+        fxRefreshStill();
+      },
+    });
+    const speedValue = h('span', { class: 'range-value' });
+    const speedRange = h('input', {
+      type: 'range',
+      min: '25',
+      max: '200',
+      step: '25',
+      value: String(Math.round(theme.fxSpeed * 100)),
+      'aria-label': 'Animation speed',
+      onInput: (e) => {
+        theme.fxSpeed = Number(e.target.value) / 100;
+        speedValue.textContent = `${e.target.value}%`;
+        saveTheme();
+      },
+    });
+    const fxOptions = h(
+      'div',
+      { class: 'fx-options' },
+      h('div', { class: 'color-row' }, fxColorInput, h('span', { class: 'color-hint', text: 'Animation color' })),
+      h('div', { class: 'range-row' }, h('span', { text: 'Speed' }), speedRange, speedValue),
+      reducedMotion() && h('p', { class: 'theme-fine', text: 'Animations are turned off in your Windows settings, so this shows a still frame.' })
+    );
+
     function sync() {
       colorInput.value = theme.color;
       hex.textContent = theme.color.toUpperCase();
@@ -356,6 +577,15 @@
         s.classList.toggle('is-active', on);
         s.setAttribute('aria-pressed', String(on));
       });
+      fxChips.forEach((c) => {
+        const on = c.dataset.fx === theme.fx;
+        c.classList.toggle('is-active', on);
+        c.setAttribute('aria-pressed', String(on));
+      });
+      fxOptions.classList.toggle('is-hidden', theme.fx === 'none');
+      fxColorInput.value = theme.fxColor;
+      speedRange.value = String(Math.round(theme.fxSpeed * 100));
+      speedValue.textContent = `${Math.round(theme.fxSpeed * 100)}%`;
       dimRow.classList.toggle('is-hidden', !bgImage);
       removeBtn.classList.toggle('is-hidden', !bgImage);
       dimRange.value = String(Math.round(theme.dim * 100));
@@ -367,6 +597,13 @@
       theme.color = color.toLowerCase();
       saveTheme();
       applyTheme();
+      sync();
+    }
+
+    function setFx(id) {
+      theme.fx = id;
+      saveTheme();
+      applyFx();
       sync();
     }
 
@@ -382,7 +619,7 @@
     }
 
     function resetAll() {
-      theme = { color: DEFAULT_BG, dim: DEFAULT_DIM };
+      theme = defaultTheme();
       bgImage = null;
       try {
         localStorage.removeItem(THEME_KEY);
@@ -391,6 +628,7 @@
         // Nothing saved to remove.
       }
       applyTheme();
+      applyFx();
       sync();
       toast('Appearance reset');
     }
@@ -429,6 +667,7 @@
         h('div', { class: 'swatches' }, swatches),
         h('div', { class: 'color-row' }, colorInput, h('span', { class: 'color-hint', text: 'Any color' }), hex)
       ),
+      h('section', {}, h('div', { class: 'theme-label', text: 'Animated background' }), h('div', { class: 'chips' }, fxChips), fxOptions),
       h(
         'section',
         {},
@@ -658,6 +897,38 @@
     );
   }
 
+  function renderScripts() {
+    const el = $('#view-scripts');
+    el.replaceChildren();
+    el.append(pageHead('Scripts', 'Ready-made scripts and how to use them.'));
+    const c = data();
+    if (state.loading && !c) {
+      el.append(skeletons(3));
+      return;
+    }
+    const list = (c && c.scripts) || [];
+    if (!list.length) {
+      el.append(empty('No scripts yet', 'New scripts will appear here.'));
+      return;
+    }
+    el.append(
+      h(
+        'div',
+        { class: 'grid' },
+        list.map((item) => {
+          const box = thumb(item, 'code');
+          if (item.duration) box.append(h('span', { class: 'duration', text: item.duration }));
+          return h(
+            'button',
+            { class: 'card', onClick: () => api.openLink(item.url).catch((e) => toast(e.message, 'error')) },
+            box,
+            h('div', { class: 'card-body' }, h('div', { class: 'card-title', text: item.title }), item.description && h('p', { class: 'card-desc', text: item.description }))
+          );
+        })
+      )
+    );
+  }
+
   // ----- extras -----
 
   function extraCard(item) {
@@ -832,7 +1103,7 @@
 
   // ---------- navigation + loading ----------
 
-  const renderers = { home: renderHome, updates: renderUpdates, tutorials: renderTutorials, extras: renderExtras };
+  const renderers = { home: renderHome, updates: renderUpdates, tutorials: renderTutorials, scripts: renderScripts, extras: renderExtras };
 
   function renderCurrent() {
     renderers[state.view]();
@@ -888,5 +1159,6 @@
 
   loadTheme();
   applyTheme();
+  applyFx();
   init().catch((err) => toast(err.message || 'The launcher could not start.', 'error'));
 })();
