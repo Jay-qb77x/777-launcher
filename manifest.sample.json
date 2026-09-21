@@ -29,21 +29,39 @@
       "duration": "2:50",
       "thumbnail": "https://i.ytimg.com/vi/uxmxW0WrPgs/hqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=uxmxW0WrPgs&t=7s"
+    },
+    {
+      "id": "Script",
+      "title": "OX Inventory Redesign",
+      "description": "OX Inventory Redesign",
+      "duration": "0:31",
+      "thumbnail": "https://i.ytimg.com/vi/E-lfd1T4sMM/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=E-lfd1T4sMM"
     }
   ],
   "extras": [
-  {
-    "id": "glock-attach",
-    "name": "Double Glock ",
-    "category": "Models",
-    "description": "Glock model",
-    "version": "1",
-    "size": 2.68,
-    "date": "2026-09-20",
-    "thumbnail": "https://cdn.discordapp.com/attachments/1548801327596052581/1551408359218090014/image.png?ex=6ab1dd20&is=6ab08ba0&hm=2006b417217aa5a77e7c578f587dbb74c001383083985746fa2e8639a99c4da6&",
-    "fileName": "glock_attach.zip",
-    "url": "https://github.com/Jay-qb77x/777-launcher-content/releases/download/files/glock_attach.zip",
-    "sha256": "e28ff731aabd5006e428b0e8714bd884cc3ddced32ebe54c858dbcb4594659a5"
-  }
+    {
+      "id": "glock-attach",
+      "name": "Double Glock ",
+      "category": "Models",
+      "description": "Glock model",
+      "version": "1",
+      "size": 2.68,
+      "date": "2026-09-20",
+      "thumbnail": "https://cdn.discordapp.com/attachments/1548801327596052581/1551408359218090014/image.png?ex=6ab1dd20&is=6ab08ba0&hm=2006b417217aa5a77e7c578f587dbb74c001383083985746fa2e8639a99c4da6&",
+      "fileName": "glock_attach.zip",
+      "url": "https://github.com/Jay-qb77x/777-launcher-content/releases/download/files/glock_attach.zip",
+      "sha256": "e28ff731aabd5006e428b0e8714bd884cc3ddced32ebe54c858dbcb4594659a5"
+    }
+  ],
+  "scripts": [
+    {
+      "id": "tow-truck",
+      "title": "Tow truck script",
+      "description": "Tow truck script",
+      "duration": "2:50",
+      "thumbnail": "https://i.ytimg.com/vi/uxmxW0WrPgs/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=yqHMJLPVC5w"
+    }
   ]
 }
