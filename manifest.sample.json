@@ -48,12 +48,12 @@
   ],
   "scripts": [
     {
-      "id": "tow-truck",
-      "title": "Tow truck script",
-      "description": "Tow truck script",
+      "id": "Illenium Appearance Rebuild",
+      "title": "Illenium Appearance Rebuild",
+      "description": "Illenium Appearance Rebuild",
       "duration": "2:50",
-      "thumbnail": "https://i.ytimg.com/vi/uxmxW0WrPgs/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=yqHMJLPVC5w"
+      "thumbnail": "  https://i.ytimg.com/vi/xmSZXNGnlVE/hqdefault.jpg",
+      "url": "https://youtu.be/xmSZXNGnlVE?si=QiUYz0ySYSuzu96S"
     }
   ]
 }
