@@ -544,6 +544,39 @@ button.card { padding: 0; cursor: pointer; color: inherit; }
 :root[data-theme="light"] .theme-pop,
 :root[data-theme="light"] .toast { box-shadow: 0 12px 32px rgba(20, 30, 60, 0.18); }
 
+/* ---------- script details popup ---------- */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(4, 6, 10, 0.66);
+  backdrop-filter: blur(4px);
+  animation: modal-fade 0.15s ease-out;
+}
+.modal-card {
+  position: relative;
+  width: min(520px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  background: var(--raised);
+  border: 1px solid var(--line-strong);
+  border-radius: 16px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+  animation: modal-pop 0.18s ease-out;
+}
+.modal-close { position: absolute; top: 10px; right: 10px; z-index: 2; background: rgba(0, 0, 0, 0.55); color: #fff; }
+.modal-close:hover { background: rgba(0, 0, 0, 0.8); color: #fff; }
+.modal-body { display: flex; flex-direction: column; gap: 10px; padding: 18px 20px 20px; }
+.modal-body h2 { font-size: 20px; font-weight: 800; letter-spacing: -0.01em; }
+.modal-desc { color: var(--muted); font-size: 14px; }
+.modal-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+@keyframes modal-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modal-pop { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: none; } }
+
 @media (max-width: 1000px) {
   .home-grid { grid-template-columns: 1fr; }
   .content { padding: 28px 24px 40px; }

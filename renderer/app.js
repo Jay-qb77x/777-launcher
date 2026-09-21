@@ -909,6 +909,77 @@
     );
   }
 
+  // ---------- script details popup (Tebex / video) ----------
+
+  let modalEl = null;
+  let modalReturnFocus = null;
+
+  function closeModal() {
+    if (!modalEl) return;
+    modalEl.remove();
+    modalEl = null;
+    document.removeEventListener('keydown', onModalKey, true);
+    if (modalReturnFocus && document.contains(modalReturnFocus)) modalReturnFocus.focus();
+    modalReturnFocus = null;
+  }
+
+  function onModalKey(e) {
+    if (e.key === 'Escape') {
+      e.stopPropagation();
+      closeModal();
+    }
+  }
+
+  function isYouTube(url) {
+    try {
+      const host = new URL(url).hostname.replace(/^www\./, '');
+      return host === 'youtube.com' || host === 'youtu.be' || host.endsWith('.youtube.com');
+    } catch {
+      return false;
+    }
+  }
+
+  function openScriptModal(item) {
+    closeModal();
+    modalReturnFocus = document.activeElement;
+    const open = (url) => api.openLink(url).catch((e) => toast(e.message, 'error'));
+    const tebex = item.tebexUrl;
+    const video = item.videoUrl || item.url; // older entries only have `url`
+    const actions = [];
+    if (tebex) {
+      actions.push(h('button', { class: 'btn btn-primary btn-lg btn-grow', onClick: () => open(tebex) }, icon('cart'), 'Buy on Tebex'));
+    }
+    if (video) {
+      actions.push(
+        h('button', { class: `btn ${tebex ? 'btn-secondary' : 'btn-primary'} btn-lg btn-grow`, onClick: () => open(video) }, icon('play'), isYouTube(video) ? 'Watch on YouTube' : 'Watch video')
+      );
+    }
+    const box = thumb(item, 'code');
+    if (item.duration) box.append(h('span', { class: 'duration', text: item.duration }));
+
+    modalEl = h(
+      'div',
+      { class: 'modal', onClick: (e) => e.target === modalEl && closeModal() },
+      h(
+        'div',
+        { class: 'modal-card', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'modal-title' },
+        h('button', { class: 'icon-btn modal-close', title: 'Close', 'aria-label': 'Close', onClick: closeModal }, icon('x')),
+        box,
+        h(
+          'div',
+          { class: 'modal-body' },
+          h('h2', { id: 'modal-title', text: item.title }),
+          item.description && h('p', { class: 'modal-desc', text: item.description }),
+          actions.length ? h('div', { class: 'modal-actions' }, actions) : h('p', { class: 'card-meta', text: 'No links available for this script yet.' })
+        )
+      )
+    );
+    document.body.append(modalEl);
+    document.addEventListener('keydown', onModalKey, true);
+    const first = $('.modal-actions .btn', modalEl) || $('.modal-close', modalEl);
+    if (first) first.focus();
+  }
+
   function renderScripts() {
     const el = $('#view-scripts');
     el.replaceChildren();
@@ -932,7 +1003,7 @@
           if (item.duration) box.append(h('span', { class: 'duration', text: item.duration }));
           return h(
             'button',
-            { class: 'card', onClick: () => api.openLink(item.url).catch((e) => toast(e.message, 'error')) },
+            { class: 'card', onClick: () => openScriptModal(item) },
             box,
             h('div', { class: 'card-body' }, h('div', { class: 'card-title', text: item.title }), item.description && h('p', { class: 'card-desc', text: item.description }))
           );
