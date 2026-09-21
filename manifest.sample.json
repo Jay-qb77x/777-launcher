@@ -64,5 +64,15 @@
       "url": "https://github.com/Jay-qb77x/777-launcher-content/releases/download/files/glass-colors.zip",
       "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
     }
+  ],
+  "Script Videos": [
+    {
+      "id": "Tow truck",
+      "title": "Tow truck script",
+      "description": "Tow truck script",
+      "duration": "2:50",
+      "thumbnail": "https://i.ytimg.com/vi/uxmxW0WrPgs/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=yqHMJLPVC5w"
+    }
   ]
 }
