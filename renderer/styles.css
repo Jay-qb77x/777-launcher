@@ -525,6 +525,8 @@ button.card { padding: 0; cursor: pointer; color: inherit; }
 .color-hex { font-size: 12px; color: var(--faint); font-variant-numeric: tabular-nums; }
 
 .fx-options { margin-top: 12px; }
+.check-row { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 12.5px; color: var(--muted); cursor: pointer; }
+.check-row input { accent-color: var(--accent); }
 .fx-options .color-row { margin-top: 0; }
 
 .theme-actions { display: flex; align-items: center; gap: 8px; }

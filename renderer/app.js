@@ -159,7 +159,7 @@
   const BLACK = [0, 0, 0];
   const THEME_VARS = ['--bg', '--panel', '--raised', '--raised-2', '--line', '--line-strong', '--text', '--muted', '--faint'];
 
-  const defaultTheme = () => ({ color: DEFAULT_BG, dim: DEFAULT_DIM, fx: 'none', fxColor: '#3d6bff', fxSpeed: 1 });
+  const defaultTheme = () => ({ color: DEFAULT_BG, dim: DEFAULT_DIM, fx: 'none', fxColor: '#3d6bff', fxSpeed: 1, fxForce: false });
   let theme = defaultTheme();
   let bgImage = null;
   let themePop = null;
@@ -188,6 +188,7 @@
       if (saved && FX_STYLES.some((f) => f.id === saved.fx)) theme.fx = saved.fx;
       if (saved && isHex(saved.fxColor)) theme.fxColor = saved.fxColor.toLowerCase();
       if (saved && typeof saved.fxSpeed === 'number') theme.fxSpeed = clamp(saved.fxSpeed, 0.25, 2);
+      if (saved && typeof saved.fxForce === 'boolean') theme.fxForce = saved.fxForce;
       const img = localStorage.getItem(IMAGE_KEY);
       if (img && img.startsWith('data:image/')) bgImage = img;
     } catch {
@@ -303,7 +304,8 @@
     { id: 'stars', name: 'Stars' },
   ];
   const fx = { canvas: null, ctx: null, raf: 0, w: 0, h: 0, last: 0, t: 0, items: [], resizing: false };
-  const reducedMotion = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const systemReduced = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const reducedMotion = () => systemReduced() && !theme.fxForce;
   const rgba = (rgb, a) => `rgba(${Math.round(rgb[0])}, ${Math.round(rgb[1])}, ${Math.round(rgb[2])}, ${a})`;
 
   function shiftHue(rgb, deg) {
@@ -342,13 +344,13 @@
     const { w, h } = fx;
     if (theme.fx === 'particles') {
       const n = clamp(Math.round((w * h) / 15000), 35, 100);
-      fx.items = Array.from({ length: n }, () => ({ x: Math.random() * w, y: Math.random() * h, vx: (Math.random() - 0.5) * 36, vy: (Math.random() - 0.5) * 36, r: 1 + Math.random() * 1.6 }));
+      fx.items = Array.from({ length: n }, () => ({ x: Math.random() * w, y: Math.random() * h, vx: (Math.random() - 0.5) * 90, vy: (Math.random() - 0.5) * 90, r: 1 + Math.random() * 1.6 }));
     } else if (theme.fx === 'stars') {
       const n = clamp(Math.round((w * h) / 5500), 80, 320);
       fx.items = Array.from({ length: n }, () => ({ x: Math.random() * w, y: Math.random() * h, r: 0.4 + Math.random() * 1.3, tw: Math.random() * 6.28, sp: 0.4 + Math.random() * 1.6, z: 0.3 + Math.random() * 0.7 }));
     } else {
       const hues = [0, 40, -35, 75];
-      fx.items = hues.map((hue) => ({ px: Math.random() * 6.28, py: Math.random() * 6.28, sx: 0.12 + Math.random() * 0.13, sy: 0.1 + Math.random() * 0.13, hue, size: 0.32 + Math.random() * 0.18 }));
+      fx.items = hues.map((hue) => ({ px: Math.random() * 6.28, py: Math.random() * 6.28, sx: 0.25 + Math.random() * 0.25, sy: 0.2 + Math.random() * 0.25, hue, size: 0.32 + Math.random() * 0.18 }));
     }
   }
 
@@ -408,8 +410,8 @@
     } else if (theme.fx === 'stars') {
       const tint = light ? rgb : mix(rgb, WHITE, 0.6);
       for (const s of items) {
-        s.x -= 3 * s.z * step;
-        s.y += 6 * s.z * step;
+        s.x -= 10 * s.z * step;
+        s.y += 20 * s.z * step;
         if (s.x < -4) s.x = w + 4;
         if (s.y > h + 4) s.y = -4;
         const twinkle = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(fx.t * s.sp + s.tw));
@@ -547,6 +549,15 @@
         fxRefreshStill();
       },
     });
+    const forceBox = h('input', {
+      type: 'checkbox',
+      id: 'fx-force',
+      onChange: (e) => {
+        theme.fxForce = e.target.checked;
+        saveTheme();
+        applyFx();
+      },
+    });
     const speedValue = h('span', { class: 'range-value' });
     const speedRange = h('input', {
       type: 'range',
@@ -566,7 +577,7 @@
       { class: 'fx-options' },
       h('div', { class: 'color-row' }, fxColorInput, h('span', { class: 'color-hint', text: 'Animation color' })),
       h('div', { class: 'range-row' }, h('span', { text: 'Speed' }), speedRange, speedValue),
-      reducedMotion() && h('p', { class: 'theme-fine', text: 'Animations are turned off in your Windows settings, so this shows a still frame.' })
+      systemReduced() && h('label', { class: 'check-row', for: 'fx-force' }, forceBox, h('span', { text: 'Windows animations are off. Animate anyway' }))
     );
 
     function sync() {
@@ -584,6 +595,7 @@
       });
       fxOptions.classList.toggle('is-hidden', theme.fx === 'none');
       fxColorInput.value = theme.fxColor;
+      forceBox.checked = theme.fxForce;
       speedRange.value = String(Math.round(theme.fxSpeed * 100));
       speedValue.textContent = `${Math.round(theme.fxSpeed * 100)}%`;
       dimRow.classList.toggle('is-hidden', !bgImage);
