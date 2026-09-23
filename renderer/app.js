@@ -5,7 +5,7 @@
 // Set url to '' to hide the button entirely.
 const SCRIPT_EXTRA_LINK = {
   label: 'Join our Discord',
-  url: 'https://discord.gg/t7Z5rYydwq',
+  url: 'https://discord.gg/your-invite',
 };
 
 
