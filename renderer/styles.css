@@ -573,7 +573,8 @@ button.card { padding: 0; cursor: pointer; color: inherit; }
 .modal-body { display: flex; flex-direction: column; gap: 10px; padding: 18px 20px 20px; }
 .modal-body h2 { font-size: 20px; font-weight: 800; letter-spacing: -0.01em; }
 .modal-desc { color: var(--muted); font-size: 14px; }
-.modal-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+.modal-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+.modal-actions .btn { width: 100%; }
 @keyframes modal-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes modal-pop { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: none; } }
 

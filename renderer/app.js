@@ -1,6 +1,14 @@
 (() => {
   'use strict';
 
+// Shown as an extra button on every script's popup, under the video button.
+// Set url to '' to hide the button entirely.
+const SCRIPT_EXTRA_LINK = {
+  label: 'Join our Discord',
+  url: 'https://discord.gg/t7Z5rYydwq',
+};
+
+
   const api = window.launcher;
   const NS = 'http://www.w3.org/2000/svg';
   const $ = (sel, root = document) => root.querySelector(sel);
@@ -952,6 +960,11 @@
     if (video) {
       actions.push(
         h('button', { class: `btn ${tebex ? 'btn-secondary' : 'btn-primary'} btn-lg btn-grow`, onClick: () => open(video) }, icon('play'), isYouTube(video) ? 'Watch on YouTube' : 'Watch video')
+      );
+    }
+    if (SCRIPT_EXTRA_LINK.url) {
+      actions.push(
+        h('button', { class: 'btn btn-ghost btn-lg btn-grow', onClick: () => open(SCRIPT_EXTRA_LINK.url) }, icon('external'), SCRIPT_EXTRA_LINK.label)
       );
     }
     const box = thumb(item, 'code');
