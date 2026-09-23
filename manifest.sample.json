@@ -9,18 +9,28 @@
       "date": "2026-09-20"
     }
   ],
-  "updates": [
-    {
-      "version": "1.0.8",
-      "title": "First release",
-      "date": "2026-09-20",
-      "notes": [
-        "Added Discord Logins🔑",
-        "Extras with one-click downloads and file verification📁",
-        "Automatic Tutorials tab❗"
-      ]
-    }
-  ],
+"updates": [
+  {
+    "version": "1.0.10",
+    "title": "Scripts and animated backgrounds",
+    "date": "2026-09-23",
+    "notes": [
+      "Added a Scripts tab",
+      "Added custom background colors and animations",
+      "Script pages can now link to Tebex and Discord"
+    ]
+  },
+  {
+    "version": "1.0.8",
+    "title": "First release",
+    "date": "2026-09-20",
+    "notes": [
+      "Added Discord Logins🔑",
+      "Extras with one-click downloads and file verification📁",
+      "Automatic Tutorials tab❗"
+    ]
+  }
+],
   "tutorials": [
     {
       "id": "fivem-weapon-glow-blender",
