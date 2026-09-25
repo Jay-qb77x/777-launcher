@@ -9,28 +9,18 @@
       "date": "2026-09-20"
     }
   ],
-"updates": [
-  {
-    "version": "1.0.10",
-    "title": "Scripts and animated backgrounds",
-    "date": "2026-09-23",
-    "notes": [
-      "Added a Scripts tab",
-      "Added custom background colors and animations",
-      "Script pages can now link to Tebex and Discord"
-    ]
-  },
-  {
-    "version": "1.0.8",
-    "title": "First release",
-    "date": "2026-09-20",
-    "notes": [
-      "Added Discord Logins🔑",
-      "Extras with one-click downloads and file verification📁",
-      "Automatic Tutorials tab❗"
-    ]
-  }
-],
+  "updates": [
+    {
+      "version": "1.0.8",
+      "title": "First release",
+      "date": "2026-09-20",
+      "notes": [
+        "Added Discord Logins🔑",
+        "Extras with one-click downloads and file verification📁",
+        "Automatic Tutorials tab❗"
+      ]
+    }
+  ],
   "tutorials": [
     {
       "id": "fivem-weapon-glow-blender",
@@ -54,7 +44,20 @@
       "fileName": "glock_attach.zip",
       "url": "https://github.com/Jay-qb77x/777-launcher-content/releases/download/files/glock_attach.zip",
       "sha256": "e28ff731aabd5006e428b0e8714bd884cc3ddced32ebe54c858dbcb4594659a5"
-    }
+    },
+  {
+  "id": "reaper-of-death",
+  "name": "Reaper of Death",
+  "category": "Models",
+  "description": "Reaper of death gun model",
+  "version": "1",
+  "size": 13808640,
+  "date": "2026-09-24",
+  "thumbnail": "https://raw.githubusercontent.com/Jay-qb77x/777-launcher-content/main/reaper-thumb.png",
+  "fileName": "Reaper_of_Death.zip",
+  "url": "https://raw.githubusercontent.com/Jay-qb77x/777-launcher-content/main/Reaper_of_Death.zip",
+  "sha256": "a333847a6592ca3cbf9bff005a236e9ac54ad5a1c4a6b53df46b2b187c863c15"
+}
   ],
   "scripts": [
     {
